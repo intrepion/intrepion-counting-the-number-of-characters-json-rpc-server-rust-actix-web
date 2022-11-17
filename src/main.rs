@@ -41,6 +41,10 @@ struct MethodNotFoundErrorResponse {
     jsonrpc: String,
 }
 
+pub async fn health_check() -> HttpResponse {
+    HttpResponse::Ok().finish()
+}
+
 async fn json_rpc_handler(item: web::Json<CharCountRequest>) -> HttpResponse {
     match item.method.as_str() {
         "char_count" => {
@@ -84,7 +88,8 @@ async fn main() -> std::io::Result<()> {
         App::new()
             .wrap(middleware::Logger::default())
             .app_data(web::JsonConfig::default().limit(4096))
-            .service(web::resource("/").route(web::post().to(json_rpc_handler)))
+            .route("/", web::post().to(json_rpc_handler))
+            .route("/health_check", web::get().to(health_check))
     })
     .listen(listener)?
     .run()
