@@ -1,6 +1,7 @@
 use actix_web::{middleware, web, App, HttpResponse, HttpServer};
 use serde::{Deserialize, Serialize};
 use std::env;
+use unicode_segmentation::UnicodeSegmentation;
 
 #[derive(Debug, Deserialize, Serialize)]
 struct CharCountParams {
@@ -44,7 +45,7 @@ async fn json_rpc_handler(item: web::Json<CharCountRequest>) -> HttpResponse {
     match item.method.as_str() {
         "char_count" => {
             let some_string = item.params.some_string.trim();
-            let count = some_string.chars().count() as i32;
+            let count = some_string.graphemes(true).count() as i32;
             let response = CharCountResponse {
                 id: item.id.clone(),
                 jsonrpc: item.jsonrpc.clone(),
@@ -139,7 +140,13 @@ mod tests {
         )
         .await;
 
-        let key_values = vec![(" ", 0), ("Oliver ", 6), (" Oliver", 6), (" Oliver ", 6)];
+        let key_values = vec![
+            (" ", 0),
+            ("Oliver ", 6),
+            (" Oliver", 6),
+            (" Oliver ", 6),
+            ("Olivér", 6),
+        ];
 
         for key_value in key_values {
             let req = test::TestRequest::post()
