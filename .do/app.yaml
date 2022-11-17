@@ -1,4 +1,4 @@
-name: counting-the-number-of-characters-server
+name: app-server
 region: sfo
 services:
 - dockerfile_path: Dockerfile

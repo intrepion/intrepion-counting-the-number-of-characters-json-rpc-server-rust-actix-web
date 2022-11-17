@@ -20,4 +20,6 @@ RUN apt-get update -y \
     && apt-get clean -y \
     && rm -rf /var/lib/apt/lists/*
 COPY --from=builder /app/target/release/intrepion-counting-the-number-of-characters-json-rpc-server-rust-actix-web intrepion-counting-the-number-of-characters-json-rpc-server-rust-actix-web
+COPY configuration configuration
+ENV APP_ENVIRONMENT production
 ENTRYPOINT ["./intrepion-counting-the-number-of-characters-json-rpc-server-rust-actix-web"]
