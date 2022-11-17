@@ -1,6 +1,6 @@
 use actix_web::{middleware, web, App, HttpResponse, HttpServer};
 use serde::{Deserialize, Serialize};
-use std::env;
+use std::{env, net::TcpListener};
 use unicode_segmentation::UnicodeSegmentation;
 
 #[derive(Debug, Deserialize, Serialize)]
@@ -77,13 +77,16 @@ async fn main() -> std::io::Result<()> {
 
     let app_url = env::var("APP_URL").unwrap_or_else(|_| "127.0.0.1".to_string());
 
+    let address = format!("{app_url}:8000");
+    let listener = TcpListener::bind(&address)?;
+
     HttpServer::new(|| {
         App::new()
             .wrap(middleware::Logger::default())
             .app_data(web::JsonConfig::default().limit(4096))
             .service(web::resource("/").route(web::post().to(json_rpc_handler)))
     })
-    .bind((app_url, 8000))?
+    .listen(listener)?
     .run()
     .await
 }
